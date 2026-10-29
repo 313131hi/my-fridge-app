@@ -1,20 +1,25 @@
 import streamlit as st
-import google.genai as genai
+import google.generativeai as genai
 from PIL import Image
 
-# 1. 페이지 설정
+# 1. 페이지 기본 설정
 st.set_page_config(page_title="스마트 냉장고 파수꾼", page_icon="🥦", layout="wide")
 
-# 2. 사이드바 API 키 입력
+# 2. 사이드바 - Gemini API 키 입력
 st.sidebar.title("⚙️ 설정")
 api_key = st.sidebar.text_input("Gemini API Key를 입력하세요", type="password")
 
 if not api_key:
-    st.warning("👈 사이드바에 Gemini API Key를 입력해주어야 작동합니다.")
-    st.info("💡 API 키는 https://aistudio.google.com/ 에서 무료로 발급받을 수 있습니다.")
+    st.warning("👈 사이드바에 Gemini API Key를 입력해주세요.")
+    st.info("💡 API 키 발급: https://aistudio.google.com/")
     st.stop()
 
-client = genai.Client(api_key=api_key)
+# API 키 설정
+try:
+    genai.configure(api_key=api_key.strip())
+except Exception as e:
+    st.error(f"API Key 설정 오류: {e}")
+    st.stop()
 
 # 3. 메인 화면
 st.title("🥦 AI 스마트 냉장고 파수꾼")
@@ -39,14 +44,13 @@ with tab1:
             with st.spinner("Gemini AI가 레시피를 만드는 중입니다..."):
                 prompt = f"다음 재료로 만들 수 있는 추천 레시피 2가지를 알려줘.\n- 재료: {ingredients}\n- 유형: {meal_type}\n- 시간: {cooking_time}분 이내"
                 try:
-                    response = client.models.generate_content(
-                        model='gemini-3.8-flash',
-                        contents=prompt
-                    )
+                    # 가장 안정적인 모델 호출
+                    model = genai.GenerativeModel('gemini-3.8-flash')
+                    response = model.generate_content(prompt)
                     st.markdown("### 🍽️ AI 추천 레시피")
                     st.write(response.text)
                 except Exception as e:
-                    st.error(f"오류 발생: {e}")
+                    st.error(f"오류가 발생했습니다: {e}")
 
 # TAB 2: 이미지 인식
 with tab2:
@@ -61,11 +65,9 @@ with tab2:
             with st.spinner("분석 중입니다..."):
                 prompt = "이미지에서 식재료 목록, 권장 보관 방법(냉장/냉동/실온), 보관 기한을 표(Table) 형태로 정돈해줘."
                 try:
-                    response = client.models.generate_content(
-                        model='gemini-3.8-flash',
-                        contents=[image, prompt]
-                    )
+                    model = genai.GenerativeModel('gemini-3.8-flash')
+                    response = model.generate_content([prompt, image])
                     st.markdown("### 📝 식재료 분석 및 보관 가이드")
                     st.write(response.text)
                 except Exception as e:
-                    st.error(f"오류 발생: {e}")
+                    st.error(f"오류가 발생했습니다: {e}")
