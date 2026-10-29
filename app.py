@@ -40,7 +40,7 @@ with tab1:
                 prompt = f"다음 재료로 만들 수 있는 추천 레시피 2가지를 알려줘.\n- 재료: {ingredients}\n- 유형: {meal_type}\n- 시간: {cooking_time}분 이내"
                 try:
                     response = client.models.generate_content(
-                        model='gemini-2.5-flash',
+                        model='gemini-3.8-flash',
                         contents=prompt
                     )
                     st.markdown("### 🍽️ AI 추천 레시피")
@@ -62,7 +62,7 @@ with tab2:
                 prompt = "이미지에서 식재료 목록, 권장 보관 방법(냉장/냉동/실온), 보관 기한을 표(Table) 형태로 정돈해줘."
                 try:
                     response = client.models.generate_content(
-                        model='gemini-2.5-flash',
+                        model='gemini-3.8-flash',
                         contents=[image, prompt]
                     )
                     st.markdown("### 📝 식재료 분석 및 보관 가이드")
